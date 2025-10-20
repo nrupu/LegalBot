@@ -31,7 +31,7 @@ embed_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 # -------------------------------
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyBx8fBsl3rEsveG3-v7uHLi6Eupq-2lcJ0")
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # -------------------------------
 # FAISS search function
@@ -87,3 +87,4 @@ Answer in clear, concise terms:
 
     except Exception as e:
         return JsonResponse({"answer": f"Error occurred: {str(e)}"})
+
