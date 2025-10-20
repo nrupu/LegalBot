@@ -1,138 +1,530 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LegalBot</title>
-  <script>
-    async function askQuestion() {
-      const query = document.getElementById("query").value.trim();
-      if (!query) {
-        document.getElementById("answer").innerText = "⚠️ Please enter a question.";
-        return;
-      }
-      const response = await fetch(`/ask/?q=${encodeURIComponent(query)}`);
-      const data = await response.json();
-      document.getElementById("answer").innerText = data.answer || "No answer found.";
-    }
-  </script>
-  <style>
-    body {
-      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; /* clean modern font */
-        font-size: 18px; /* bigger base size */
-         line-height: 1.7; /* more spacing between lines */
-         color: #222; /* darker text for contrast */
-      background: linear-gradient(135deg, #e3f2fd, #f5f5f5);
-      margin: 0;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalBot - AI Legal Assistant</title>
+    <style>
+        /* Base Reset and Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    h1 {
-      color: #1a237e;
-      margin-bottom: 25px;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: 700;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #03041c; /* Deep Dark Blue */
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
 
-    .container {
-      max-width: 800px;
-      width: 100%;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      animation: fadeIn 0.6s ease-in-out;
-    }
+        /* UTILITY CLASSES */
+        .hidden { display: none !important; }
 
-    /* Input and button in one row */
-    .input-group {
-      display: flex;
-      gap: 12px;
-    }
+        /* MARQUEE/MOVING SLOGAN BAR STYLES */
+        .slogan-bar {
+            width: 100%;
+            background-color: #1a237e; /* Darker blue background */
+            padding: 8px 0;
+            overflow: hidden;
+            font-size: 1rem;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-    input[type="text"] {
-      flex: 1;
-      padding: 14px 16px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-      transition: all 0.3s;
-    }
+        .slogan-text {
+            display: inline-block;
+            animation: marquee 30s linear infinite; /* Increased duration for slower speed */
+            color: #ffda77; /* Highlight color */
+            font-weight: 500;
+        }
 
-    input[type="text"]:focus {
-      border-color: #3949ab;
-      box-shadow: 0 0 6px rgba(57, 73, 171, 0.3);
-      outline: none;
-    }
+        @keyframes marquee {
+            0% { transform: translate(100%, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
 
-    button {
-      background: #1a237e;
-      color: #fff;
-      padding: 14px 22px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: 500;
-      transition: all 0.3s;
-    }
+        /* HEADER / NAVIGATION BAR (SIMPLIFIED) */
+        .header {
+            display: flex;
+            justify-content: center; /* Center the logo */
+            align-items: center;
+            padding: 20px 0;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
 
-    button:hover {
-      background: #283593;
-      transform: translateY(-2px);
-    }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4da6ff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
 
-    button:active {
-      transform: translateY(0);
-    }
+        .logo-icon {
+            font-size: 2.2rem;
+            margin-right: 8px;
+        }
+        
+        /* GENERAL PAGE CONTENT CONTAINER */
+        .page-content {
+            width: 100%;
+            max-width: 900px;
+            padding: 0 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.6s ease-in-out;
+            margin: auto;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-    p {
-      font-weight: 600;
-      margin: 0;
-      color: #1a237e;
-    }
+        /* LANDING PAGE STYLES */
+        #landing-page {
+            text-align: center;
+            background-color: #03041c;
+        }
 
-    #answer {
-      width: 95%;
-      min-height: 150px;
-      padding: 18px;
-      border: 1px solid #e0e0e0;
-      background: #fafafa;
-      border-radius: 8px;
-      line-height: 1.6;
-      font-family: "Courier New", monospace;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-      white-space: pre-wrap;
-      overflow-y: auto;
-      transition: background 0.3s;
-    }
+        /* HERO SECTION STYLES */
+        .hero-section {
+            padding: 50px 0 80px;
+            background: radial-gradient(circle at center 60%, rgba(13, 20, 60, 0.5) 0%, rgba(3, 4, 28, 0.8) 50%, #03041c 100%);
+            position: relative;
+            z-index: 1;
+        }
 
-    #answer:hover {
-      background: #fdfdfd;
-    }
+        .ai-graphic {
+            position: relative;
+            margin: 0 auto 50px;
+            width: 300px;
+            height: 250px;
+            background: 
+                radial-gradient(circle at center, #80bfff 0%, rgba(42, 107, 187, 0.5) 30%, transparent 70%), 
+                linear-gradient(to top, #0f1640, #03041c);
+            border-radius: 50% 50% 0 0;
+            opacity: 0.9;
+            box-shadow: 0 0 50px rgba(77, 166, 255, 0.5);
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
+        .ai-graphic::before {
+            content: '🏛️';
+            font-size: 6rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .sub-text-container {
+            display: flex;
+            justify-content: center;
+            max-width: 1000px;
+            margin: 0 auto 50px;
+        }
+
+        .sub-text-box {
+            flex: 1;
+            padding: 20px 40px;
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(77, 166, 255, 0.3);
+        }
+        
+        .sub-text-box:first-child {
+            text-align: right;
+            border-right: 1px solid rgba(77, 166, 255, 0.3);
+        }
+
+        .sub-text-box:last-child {
+            text-align: left;
+        }
+
+        .headline-text {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            font-weight: 900;
+            color: #ffffff;
+            margin-bottom: 50px;
+            text-shadow: 0 0 10px rgba(77, 166, 255, 0.5);
+        }
+
+        .headline-text span {
+            color: #ffda77; 
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+        }
+
+        .cta-button {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cta-button.primary {
+            background-color: #4da6ff;
+            color: #03041c;
+            box-shadow: 0 4px 20px rgba(77, 166, 255, 0.4);
+        }
+
+        .cta-button.primary:hover {
+            background-color: #66b3ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(77, 166, 255, 0.6);
+        }
+        
+
+        /* CHAT VIEW STYLES */
+        #chat-view {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 80vh;
+            margin: 40px auto;
+        }
+        
+        #chat-view .chat-header {
+            background: #1a237e;
+            color: #fff;
+            padding: 15px;
+            margin: 0;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #chat-view h1 {
+            color: #fff;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .back-button {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s, border-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+
+        #chat-history {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #fcfcfc;
+        }
+
+        .message {
+            display: flex;
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message .message-bubble {
+            background-color: #3949ab;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message .message-bubble {
+            background-color: #e0e0e0;
+            color: #222;
+            border-bottom-left-radius: 5px;
+        }
+
+        .bot-source {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.75rem;
+            color: #555;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        /* Typing Indicator styles are preserved */
+
+        /* Input Group (Modified padding for height) */
+        .input-group {
+            display: flex;
+            border-top: 1px solid #e0e0e0;
+            padding: 15px; /* Increased padding around input */
+        }
+
+        /* TEXT INPUT FIELD (Increased size here) */
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 18px; /* Increased padding for larger height */
+            border: 1px solid #ccc;
+            border-radius: 8px 0 0 8px;
+            font-size: 1.1rem; /* Significantly increased font size */
+            transition: all 0.3s;
+            outline: none;
+            color: #03041c;
+        }
+
+        /* Send Button (Adjusted padding to match increased input height) */
+        button.send-button {
+            background: #3949ab;
+            color: #fff;
+            padding: 15px 20px; /* Matched vertical padding to input */
+            border: none;
+            border-radius: 0 8px 8px 0;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+            /* Ensure the SVG icon is also centered and looks right */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.send-button svg {
+            width: 24px; /* Slightly larger icon */
+            height: 24px;
+        }
+
+        button.send-button:hover {
+            background: #5c6bc0;
+        }
+        
+        /* FOOTER DISCLAIMER */
+        .disclaimer {
+            text-align: center;
+            padding: 10px 0;
+            font-size: 0.9rem;
+            color: #d32f2f;
+            background: #ffebee;
+            width: 100%;
+            border-top: 1px solid #ef9a9a;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 900px) {
+            .headline-text {
+                font-size: 3rem;
+            }
+            /* ... (other media query styles preserved) ... */
+        }
+    </style>
 </head>
 <body>
-  <h1>⚖️AI Powered Legal Assistant </h1>
-  <div class="container">
-    <div class="input-group">
-      <input type="text" id="query" placeholder="Enter your legal question...">
-      <button onclick="askQuestion()">Ask</button>
+    
+    <div class="slogan-bar">
+        <div class="slogan-text">
+            **Justice Delayed is Justice Denied** | **The Law is Reason, Free from Passion** | **Ignorance of the Law Excuses No One** | **Fiat justitia ruat caelum (Let justice be done, though the heavens fall)** | 
+        </div>
     </div>
-    <p>Answer:</p>
-    <div id="answer"></div>
-  </div>
+
+    <div class="landing-container">
+        
+        <div id="landing-page" class="page-content">
+            <header class="header">
+                <a href="#" class="logo">
+                    <span class="logo-icon">⚖️</span> LegalBot
+                </a>
+            </header>
+
+            <div class="hero-section">
+                <div class="ai-graphic"></div>
+
+                <div class="sub-text-container">
+                    <div class="sub-text-box">
+                        **Justice is truth in action.** (Joseph Joubert)
+                    </div>
+                    <div class="sub-text-box">
+                        **Injustice anywhere is a threat to justice everywhere.** (MLK Jr.)
+                    </div>
+                </div>
+
+                <h2 class="headline-text">
+                    Simplify Every <span>Statute</span>.<br>
+                    Access Legal <span>Clarity</span>.
+                </h2>
+
+                <div class="cta-buttons">
+                    <button class="cta-button primary" onclick="goToChat()">
+                        Start Chatting Now
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="chat-view" class="page-content hidden">
+            
+            <div class="chat-header">
+                <h1>LegalBot Chat 💬</h1>
+                <button class="back-button" onclick="showLanding()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                    Back
+                </button>
+            </div>
+            
+            <div id="chat-history">
+                <div class="message bot-message">
+                    <div class="message-bubble">
+                        Hello! I'm LegalBot. Ask me a question about legal terms or documents.
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="query" placeholder="Enter your legal question..." onkeypress="if(event.key === 'Enter') askQuestion()">
+                <button class="send-button" onclick="askQuestion()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+
+    </div>
+    
+    <footer class="disclaimer">
+        ⚠️ **Disclaimer:** LegalBot provides informational summaries and should **NOT** be considered legal advice. Consult a qualified attorney for specific legal guidance.
+    </footer>
+
+    <script>
+        // FUNCTION TO SHOW CHAT
+        function showChat() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('chat-view').classList.remove('hidden');
+            const history = document.getElementById("chat-history");
+            document.getElementById("query").focus();
+            history.scrollTop = history.scrollHeight;
+        }
+
+        // FUNCTION TO SHOW LANDING PAGE (Back button handler)
+        function showLanding() {
+            document.getElementById('chat-view').classList.add('hidden');
+            document.getElementById('landing-page').classList.remove('hidden');
+        }
+        
+        // This function now calls the actual visibility switcher.
+        function goToChat() {
+            showChat(); 
+        }
+
+        // FUNCTION TO RENDER A MESSAGE
+        function addMessage(text, sender, isTyping = false) {
+            const history = document.getElementById("chat-history");
+            
+            if (isTyping) {
+                 const existingTyping = document.getElementById('typing-indicator');
+                 if (existingTyping) existingTyping.remove();
+
+                 const typingDiv = document.createElement('div');
+                 typingDiv.id = 'typing-indicator';
+                 typingDiv.classList.add('message', 'bot-message');
+                 typingDiv.innerHTML = `
+                    <div class="message-bubble typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                 `;
+                 history.appendChild(typingDiv);
+                 history.scrollTop = history.scrollHeight;
+                 return;
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${sender}-message`);
+
+            let content = `<div class="message-bubble">${text}</div>`;
+            
+            if (sender === 'bot') {
+                content = content.replace('</div>', `<span class="bot-source">Source: AI Synthesis (Always verify facts)</span></div>`);
+            }
+
+            messageDiv.innerHTML = content;
+            history.appendChild(messageDiv);
+            history.scrollTop = history.scrollHeight;
+        }
+
+        // ASYNC FUNCTION TO ASK QUESTION
+        async function askQuestion() {
+            const queryInput = document.getElementById("query");
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            addMessage(query, 'user');
+            queryInput.value = '';
+            addMessage(null, 'bot', true);
+
+            try {
+                // The fetch URL assumes your backend is running on the same host
+                const response = await fetch(`/ask/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                const existingTyping = document.getElementById('typing-indicator');
+                if (existingTyping) existingTyping.remove();
+
+                const answerText = data.answer || "Sorry, I couldn't find an answer for that query.";
+                addMessage(answerText, 'bot');
+
+            } catch (error) {
+                console.error("Fetch error:", error);
+                
+                const existingTyping = document.getElementById('typing-indicator');
+                if (existingTyping) existingTyping.remove();
+
+                addMessage("An error occurred while connecting to the server.", 'bot');
+            }
+        }
+    </script>
 </body>
 </html>
